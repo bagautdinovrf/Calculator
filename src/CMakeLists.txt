@@ -7,5 +7,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(Calculator
     main.cpp
-    calculate.cpp calculate.h
+    calculator.cpp calculator.h
+    mymath.cpp mymath.h
     )
