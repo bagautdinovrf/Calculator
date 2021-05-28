@@ -19,16 +19,24 @@ int MyMath::my_atoi( char str[] )
 return result;
 }
 
-
+/**
+ * @brief MyMath::my_atod
+ * Например число 54.87, с точкой
+ * @param str - указатель на строку
+ * @return - возвращаем число
+ */
 double MyMath::my_atod( char *str )
 {
     double result = 0;
 
 
-    while( *str != '.') {
+    while( *str != '.' && *str != '\0' ) {
         result = result*10 + (*str-'0');
         ++str;
     }
+
+    if( *str == '\0' )
+        return result;
 
     // Перешагиваем через точку
     ++str;
