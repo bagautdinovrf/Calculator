@@ -9,4 +9,5 @@ add_executable(Calculator
     main.cpp
     calculator.cpp calculator.h
     mymath.cpp mymath.h
+    token.cpp token.h
     )

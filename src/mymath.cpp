@@ -1,9 +1,14 @@
+#include <cstring>
+#include <iostream>
+
 #include "mymath.h"
 
 
+using namespace std;
+
 MyMath::MyMath()
 {
-
+    //
 }
 
 
@@ -35,6 +40,7 @@ double MyMath::my_atod( char *str )
         ++str;
     }
 
+    // Возвращаем результат если дошли до конца строки
     if( *str == '\0' )
         return result;
 
@@ -43,6 +49,7 @@ double MyMath::my_atod( char *str )
 
     int i = 1;
     while( *str != '\0') {
+        //TODO: если встретили точку то exception
         result = result*10 + (*str-'0');
         ++str;
         i *= 10;
@@ -50,5 +57,38 @@ double MyMath::my_atod( char *str )
 
     result = result / i;
 
-return result;
+    return result;
 }
+
+void MyMath::str_size(const char *str)
+{
+    cout << strlen(str) << endl;
+    cout << sizeof (str) << endl;
+    cout << sizeof (*str) << endl;
+}
+
+bool MyMath::isDigit( const char ch )
+{
+    if( (ch >='0' && ch <= '9') )
+        return true;
+
+return false;
+}
+
+bool MyMath::isDot( const char ch )
+{
+    if ( ch == '.' )
+        return true;
+return false;
+}
+
+
+bool MyMath::isDigitDot( const char ch )
+{
+    if( (ch >='0' && ch <= '9') || ch == '.' )
+        return true;
+
+return false;
+}
+
+
