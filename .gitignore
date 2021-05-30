@@ -2,3 +2,4 @@
 build-src-Desktop_Qt_6_1_0_MinGW_64_bit-Debug/*
 src/CMakeLists.txt.user
 doc/~$Задача.docx
+src/CMakeLists.txt.user
