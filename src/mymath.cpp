@@ -49,7 +49,7 @@ double MyMath::my_atod( char *str )
 
     int i = 1;
     while( *str != '\0') {
-        //TODO: если встретили точку то exception
+        //TODO: если встретили точку то exception -> Проверка на количество точек. Хотя в преобразовании в постфикс уже проверено
         result = result*10 + (*str-'0');
         ++str;
         i *= 10;

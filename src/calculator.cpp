@@ -56,88 +56,81 @@ list<string> Calculator::sortFromInfix( const char *str )
             ++str;
         }
 
-        string num = "";
-        while ( MyMath::isDigitDot( *str ) ) {
+        if( MyMath::isDigitDot(*str) ) {
+            string num = "";
+            while ( MyMath::isDigitDot( *str ) ) {
 
-            int dot_count = 0;
-            if( MyMath::isDot( *str ) ) {
-                ++dot_count;
-                if( dot_count > 1) {
-                    throw std::runtime_error( "Floating poin error..." );
-                }
-            }
-
-            num.push_back( *str );
-            ++str;
-        }
-
-        if( false == num.empty() ) {
-            postfix.push_back( num );
-        }
-
-        /*!!!!!!!!!!!!!!!!!!!!!!!!!*/
-        while ( *str == ' ' ) {
-            ++str;
-        }
-
-        if( *str == '\0' )
-            continue;
-
-        /*!!!!!!!!!!!!!!!!!!!!!!!!!*/
-
-        auto currentToken = mTokenMap[*str];
-        if( currentToken.isValid() )
-        {
-            if( currentToken.type() == Token::OPERATOR ) {
-                if( oper_stack.empty() )
-                    oper_stack.push( currentToken );
-                else {
-                    // Если оператор из стека круче чем текущий или равен, то вынимаем в список из стека пока на вершине стека не будет меньше
-                    if( oper_stack.top().priority() >= currentToken.priority() ) {
-                        while( !oper_stack.empty() && oper_stack.top().priority() >= currentToken.priority() ) {
-                            postfix.push_back( oper_stack.top().valueString() );
-                            oper_stack.pop();
-                        }
+                int dot_count = 0;
+                if( MyMath::isDot( *str ) ) {
+                    ++dot_count;
+                    if( dot_count > 1) {
+                        throw std::runtime_error( "Floating poin error..." );
                     }
-                    // Если нет, то кладем в стек или все вынули
-                    oper_stack.push( currentToken );
                 }
+
+                num.push_back( *str );
+                ++str;
             }
-            // Если открываюшая скобка то кладет в стек
-            else if( currentToken.type() == Token::OPEN_BRACKET ) {
-                oper_stack.push( currentToken );
-            }
-            // Если закрывающая то вынимаем все из стека в список пока не найдет открывающуюся
-            else if( currentToken.type() == Token::CLOSE_BRACKET ) {
-                while( !oper_stack.empty() && oper_stack.top().type() != Token::OPEN_BRACKET ) {
-                    postfix.push_back( oper_stack.top().valueString() );
-                    oper_stack.pop();
-                }
-                // Вынимаем открывающую скобку
-                if( !oper_stack.empty() && oper_stack.top().type() == Token::OPEN_BRACKET ) {
-                    oper_stack.pop();
-                } else {
-                    throw std::runtime_error("OPEN_BRACKET \( not found...");
-                }
-            } else {
-                throw std::runtime_error("Unknown token: " + currentToken.valueString() + "..." );
+
+            if( false == num.empty() ) {
+                postfix.push_back( num );
             }
         }
         else {
-            string s;
-            s.push_back(*str);
-            throw std::runtime_error("Invalid token: " + currentToken.valueString() + "!" + s + "...");
-        }
+            auto currentToken = mTokenMap[*str];
+            if( currentToken.isValid() )
+            {
+                if( currentToken.type() == Token::OPERATOR ) {
+                    if( oper_stack.empty() )
+                        oper_stack.push( currentToken );
+                    else {
+                        // Если оператор из стека круче чем текущий или равен, то вынимаем в список из стека пока на вершине стека не будет меньше
+                        if( oper_stack.top().priority() >= currentToken.priority() ) {
+                            while( !oper_stack.empty() && oper_stack.top().priority() >= currentToken.priority() ) {
+                                postfix.push_back( oper_stack.top().valueString() );
+                                oper_stack.pop();
+                            }
+                        }
+                        // Если нет, то кладем в стек или все вынули
+                        oper_stack.push( currentToken );
+                    }
+                }
+                // Если открываюшая скобка то кладет в стек
+                else if( currentToken.type() == Token::OPEN_BRACKET ) {
+                    oper_stack.push( currentToken );
+                }
+                // Если закрывающая то вынимаем все из стека в список пока не найдет открывающуюся
+                else if( currentToken.type() == Token::CLOSE_BRACKET ) {
+                    while( !oper_stack.empty() && oper_stack.top().type() != Token::OPEN_BRACKET ) {
+                        postfix.push_back( oper_stack.top().valueString() );
+                        oper_stack.pop();
+                    }
+                    // Вынимаем открывающую скобку
+                    if( !oper_stack.empty() && oper_stack.top().type() == Token::OPEN_BRACKET ) {
+                        oper_stack.pop();
+                    } else {
+                        throw std::runtime_error("OPEN_BRACKET ( not found...");
+                    }
+                } else {
+                    throw std::runtime_error("Unknown token: " + currentToken.valueString() + "..." );
+                }
+            }
+            else {
+                string s;
+                s.push_back(*str);
+                throw std::runtime_error("Invalid token: " + currentToken.valueString() + "!" + s + "...");
+            }
 
-        // Увеличивам указатель на 1
-        ++str;
+            // Увеличивам указатель на 1
+            ++str;
+        }
     } // end of while
 
 
     while( !oper_stack.empty() ) {
         auto top = oper_stack.top();
         if( top.type() == Token::OPEN_BRACKET ) {
-            throw std::runtime_error("Bad token: ( in stack...");
+            throw std::runtime_error("Absent ). Found token: ( in stack...");
         }
         postfix.push_back( top.valueString() );
         oper_stack.pop();
