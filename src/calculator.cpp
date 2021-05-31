@@ -133,10 +133,8 @@ vector<string> Calculator::sortFromInfix( const char *str )
 double Calculator::calculate( vector<string> &postfix_list )
 {
     stack< double > number_stack;
-    int power_count = 0;
-    int iteration = 0;
 
-    for( int i = 0; i < postfix_list.size(); ++i )
+    for( unsigned int i = 0; i < postfix_list.size(); ++i )
     {
         auto &token = postfix_list.at(i);
 
@@ -148,62 +146,63 @@ double Calculator::calculate( vector<string> &postfix_list )
         } else {
 
             auto oper = m_token_map[token.front()];
-//            if( oper.valueString().front() != '^' ) {
+            if( oper.valueString().front() != '^' ) {
                 double right = number_stack.top();
                 number_stack.pop();
                 double left = number_stack.top();
                 number_stack.pop();
-//            }
 
-            switch ( oper.valueString().front() ) {
-                case '+':
-                    number_stack.push( left + right );
-                break;
+                switch ( oper.valueString().front() ) {
+                    case '+':
+                        number_stack.push( left + right );
+                    break;
 
-                case '-':
-                    number_stack.push( left - right );
-                break;
+                    case '-':
+                        number_stack.push( left - right );
+                    break;
 
-                case '*':
-                    number_stack.push( left * right );
-                break;
+                    case '*':
+                        number_stack.push( left * right );
+                    break;
 
-                case '/':
-                    if( right != 0 )
-                        number_stack.push( left / right );
-                    else
-                        throw std::runtime_error("Division by zero...");
-                break;
+                    case '/':
+                        if( right != 0 )
+                            number_stack.push( left / right );
+                        else
+                            throw std::runtime_error("Division by zero...");
+                    break;
 
-                case '^':
-                    number_stack.push(left);
-                    number_stack.push(right);
 
-                    power_count = 1;
-                    int pow_position = iteration + 2;
-                    while( pow_position < postfix_list.size() && "^" == postfix_list[pow_position] ) {
-                        ++power_count;
-                        ++i;
-                        pow_position = iteration + 2;
-                        token = postfix_list.at(i);
-                        if( MyMath::isDigitDot( token.front() ) )
-                            number_stack.push( MyMath::my_atod (token.data() ) );
-                         else throw std::runtime_error("Bad token, number expected...");
+                }
+            } else {
+                unsigned int power_count = 1;
+                unsigned int pow_position = i + 2;
+                while( pow_position < postfix_list.size() && "^" == postfix_list.at( pow_position ) ) {
+                    ++power_count;
+                    i = pow_position;
+                    pow_position += 2;
+
+                    token = postfix_list.at(i-1);
+
+                    if( MyMath::isDigitDot( token.front() ) ) {
+                        number_stack.push( MyMath::my_atod (token.data() ) );
                     }
-
-                    for( int pwc = 0; pwc < power_count; ++pwc ) {
-                        right = number_stack.top();
-                        number_stack.pop();
-                        left = number_stack.top();
-                        number_stack.pop();
-                        number_stack.push( pow( left, right ) );
+                     else {
+                        throw std::runtime_error("Bad token, number expected...");
                     }
-                    power_count = 0;
-                break;
-            }
+                }
+
+                for( unsigned int pwc = 0; pwc < power_count; ++pwc ) {
+                    auto right = number_stack.top();
+                    number_stack.pop();
+                    auto left = number_stack.top();
+                    number_stack.pop();
+                    number_stack.push( pow( left, right ) );
+                }
+
+            } // token '^' cycle
         }
 
-        ++iteration;
     }
 
     return number_stack.top();

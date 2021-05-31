@@ -2,6 +2,7 @@
 #define CALCULATOR_H
 
 #include <list>
+#include <vector>
 #include <string>
 #include <unordered_map>
 #include <memory>
