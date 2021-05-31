@@ -57,7 +57,7 @@ list<string> Calculator::sortFromInfix( const char *str )
         }
 
         if( MyMath::isDigitDot(*str) ) {
-            string num = "";
+            string num;
             while ( MyMath::isDigitDot( *str ) ) {
 
                 int dot_count = 0;
@@ -72,9 +72,7 @@ list<string> Calculator::sortFromInfix( const char *str )
                 ++str;
             }
 
-            if( false == num.empty() ) {
-                postfix.push_back( num );
-            }
+            postfix.push_back( num );
         }
         else {
             auto currentToken = mTokenMap[*str];

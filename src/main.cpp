@@ -17,7 +17,9 @@ int main()
 //    char str[] = "(10 - 15) * 3";
 //    char str[] = "2 ^ 2 ^ 3";
 
-//    cout << MyMath::my_atod(str) << endl;
+
+//    char s[] = ".";
+//    cout << MyMath::my_atod(s) << endl;
 
     Calculator calc;
     calc.calc( str );
