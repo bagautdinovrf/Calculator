@@ -3,3 +3,4 @@ build-src-Desktop*
 doc/~$Задача.docx
 *.user
 src/CMakeLists.txt.user*
+src/src.zip
