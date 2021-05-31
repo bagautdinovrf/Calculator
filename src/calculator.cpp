@@ -20,27 +20,21 @@ Calculator::Calculator()
     mTokenMap['+'] = Token( "+", 2 );
     mTokenMap['-'] = Token( "-", 2 );
 
-    mTokenMap['*'] = Token( "*", 3 );
-    mTokenMap['/'] = Token( "/", 3 );
+    mTokenMap['*'] = Token( '*', 3 );
+    mTokenMap['/'] = Token( '/', 3 );
 
-    mTokenMap['^'] = Token( "^", 4 );
-    mTokenMap['~'] = Token( "~", 5 );
-
-
-//    for( const auto &token : mTokenMap ) {
-//        cout << token.second->valueString() << token.second->priority() << endl;
-//    }
+    mTokenMap['^'] = Token( '^', 4 );
+    mTokenMap['~'] = Token( '~', 5 );
 }
 
 double Calculator::calc( const char *str )
 {
     double result = 0.0;
 
-    auto postfix = sortFromInfix(str);
-
-    for ( const auto &s : postfix ) {
-        cout << s << endl;
-    }
+//    auto postfix = sortFromInfix(str);
+//    for ( const auto &s : postfix ) {
+//        cout << s << endl;
+//    }
 
     return result;
 }
@@ -107,7 +101,7 @@ list<string> Calculator::sortFromInfix( const char *str )
                     if( !oper_stack.empty() && oper_stack.top().type() == Token::OPEN_BRACKET ) {
                         oper_stack.pop();
                     } else {
-                        throw std::runtime_error("OPEN_BRACKET '(' not found...");
+                        throw std::runtime_error("Open bracket: '(' not found...");
                     }
                 } else {
                     throw std::runtime_error("Unknown token: '" + currentToken.valueString() + "' ..." );
@@ -128,7 +122,7 @@ list<string> Calculator::sortFromInfix( const char *str )
     while( !oper_stack.empty() ) {
         auto top = oper_stack.top();
         if( top.type() == Token::OPEN_BRACKET ) {
-            throw std::runtime_error("Absent ). Found token: ( in stack...");
+            throw std::runtime_error("Absent token: ')'. But found token: '(' in stack...");
         }
         postfix.push_back( top.valueString() );
         oper_stack.pop();

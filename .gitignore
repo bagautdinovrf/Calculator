@@ -1,5 +1,5 @@
-
 build-src-Desktop_Qt_6_1_0_MinGW_64_bit-Debug/*
-src/CMakeLists.txt.user
+build-src-Desktop*
 doc/~$Задача.docx
 *.user
+src/CMakeLists.txt.user*

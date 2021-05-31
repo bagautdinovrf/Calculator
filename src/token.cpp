@@ -1,6 +1,8 @@
+
 #include <iostream>
 
 #include "token.h"
+
 
 Token::Token( string val, int pr, TypeToken type ) :
     mValue(val),
@@ -8,22 +10,24 @@ Token::Token( string val, int pr, TypeToken type ) :
     mType(type),
     mValid(true)
 {
-//    cout << mValue << mPriority << mValid << endl;
-//    cout << valueString() << priority() << isValid() << endl;
+    //
 }
 
-Token::Token( char val, int pr, TypeToken type )
+Token::Token( char val, int pr, TypeToken type ) : Token ( "", pr, type )
 {
-    string str;
-    str.push_back(val);
-    Token ( str, pr, type );
+    mValue.push_back(val);
 }
 
 Token::Token(double val, Token::TypeToken type) :
     mValueDouble( val ),
     mType( type )
 {
+    //
+}
 
+Token::~Token()
+{
+//    cout << "~Token()";
 }
 
 
