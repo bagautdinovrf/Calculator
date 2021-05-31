@@ -64,7 +64,7 @@ list<string> Calculator::sortFromInfix( const char *str )
                 if( MyMath::isDot( *str ) ) {
                     ++dot_count;
                     if( dot_count > 1) {
-                        throw std::runtime_error( "Floating poin error..." );
+                        throw std::runtime_error( "Floating point error..." );
                     }
                 }
 
@@ -107,16 +107,16 @@ list<string> Calculator::sortFromInfix( const char *str )
                     if( !oper_stack.empty() && oper_stack.top().type() == Token::OPEN_BRACKET ) {
                         oper_stack.pop();
                     } else {
-                        throw std::runtime_error("OPEN_BRACKET ( not found...");
+                        throw std::runtime_error("OPEN_BRACKET '(' not found...");
                     }
                 } else {
-                    throw std::runtime_error("Unknown token: " + currentToken.valueString() + "..." );
+                    throw std::runtime_error("Unknown token: '" + currentToken.valueString() + "' ..." );
                 }
             }
             else {
                 string s;
                 s.push_back(*str);
-                throw std::runtime_error("Invalid token: " + currentToken.valueString() + "!" + s + "...");
+                throw std::runtime_error("Invalid token: '" + currentToken.valueString() + "' current char: '" + s + "' ...");
             }
 
             // Увеличивам указатель на 1
