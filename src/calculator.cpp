@@ -187,6 +187,7 @@ double Calculator::calculate( vector<string> &postfix_list )
 
                 }
             } else {
+                // Вычисление возведения в степень
                 unsigned int power_count = 1;
                 unsigned int pow_position = i + 2;
                 while( pow_position < postfix_list.size() && "^" == postfix_list.at( pow_position ) ) {
