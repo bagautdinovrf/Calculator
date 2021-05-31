@@ -33,8 +33,8 @@ double Calculator::calc( const char *str )
     for ( const auto &s : postfix ) {
         cout << s << endl;
     }
-//    return calculate(postfix);
-    return double();
+    return calculate(postfix);
+//    return double();
 }
 
 vector<string> Calculator::sortFromInfix( const char *str )
@@ -136,19 +136,25 @@ double Calculator::calculate( vector<string> &postfix_list )
     int power_count = 0;
     int iteration = 0;
 
-    for( auto &token : postfix_list )
+    for( int i = 0; i < postfix_list.size(); ++i )
     {
+        auto &token = postfix_list.at(i);
+
         if( token.empty() )
             continue;
 
         if( MyMath::isDigitDot( token.front() ) ) {
             number_stack.push( MyMath::my_atod (token.data() ) );
         } else {
+
             auto oper = m_token_map[token.front()];
-            double right = number_stack.top();
-            number_stack.pop();
-            double left = number_stack.top();
-            number_stack.pop();
+//            if( oper.valueString().front() != '^' ) {
+                double right = number_stack.top();
+                number_stack.pop();
+                double left = number_stack.top();
+                number_stack.pop();
+//            }
+
             switch ( oper.valueString().front() ) {
                 case '+':
                     number_stack.push( left + right );
@@ -170,13 +176,29 @@ double Calculator::calculate( vector<string> &postfix_list )
                 break;
 
                 case '^':
+                    number_stack.push(left);
+                    number_stack.push(right);
+
                     power_count = 1;
                     int pow_position = iteration + 2;
                     while( pow_position < postfix_list.size() && "^" == postfix_list[pow_position] ) {
                         ++power_count;
+                        ++i;
                         pow_position = iteration + 2;
+                        token = postfix_list.at(i);
+                        if( MyMath::isDigitDot( token.front() ) )
+                            number_stack.push( MyMath::my_atod (token.data() ) );
+                         else throw std::runtime_error("Bad token, number expected...");
                     }
-                    number_stack.push( pow( left, right ) );
+
+                    for( int pwc = 0; pwc < power_count; ++pwc ) {
+                        right = number_stack.top();
+                        number_stack.pop();
+                        left = number_stack.top();
+                        number_stack.pop();
+                        number_stack.push( pow( left, right ) );
+                    }
+                    power_count = 0;
                 break;
             }
         }
