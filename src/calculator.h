@@ -21,7 +21,6 @@ private:
      vector<string> sortFromInfix(const char* str );
      double calculate( vector<string> &postfix_list );
 
-
     unordered_map< char, Token > m_token_map;
 };
 

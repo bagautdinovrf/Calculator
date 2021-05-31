@@ -18,10 +18,8 @@ Calculator::Calculator()
 
     m_token_map['+'] = Token( "+", 2 );
     m_token_map['-'] = Token( "-", 2 );
-
     m_token_map['*'] = Token( '*', 3 );
     m_token_map['/'] = Token( '/', 3 );
-
     m_token_map['^'] = Token( '^', 4 );
     m_token_map['~'] = Token( '~', 5 );
 }
@@ -34,13 +32,13 @@ double Calculator::calc( const char *str )
         cout << s << endl;
     }
     return calculate(postfix);
-//    return double();
 }
 
 vector<string> Calculator::sortFromInfix( const char *str )
 {
     vector<string> postfix;
     stack< Token >  oper_stack;
+    Token prev_token = Token();
 
     while( *str != '\0' ) {
 
@@ -65,12 +63,21 @@ vector<string> Calculator::sortFromInfix( const char *str )
             }
 
             postfix.push_back( num );
+            prev_token = Token( MyMath::my_atod( num.data() ) );
         }
         else {
             auto current_token = m_token_map[*str];
             if( current_token.isValid() )
             {
                 if( current_token.type() == Token::OPERATOR ) {
+                    // Подставляем унарный минус. Если перед минусом пусто, не число и не скобка ')'
+                    if( ( *str == '-' && false == prev_token.isValid() ) ||
+                        ( *str == '-' && Token::NUMBER != prev_token.type() && Token::CLOSE_BRACKET != prev_token.type() )
+                    )
+                    {
+                        current_token = m_token_map['~'];
+                    }
+
                     if( oper_stack.empty() )
                         oper_stack.push( current_token );
                     else {
@@ -113,6 +120,7 @@ vector<string> Calculator::sortFromInfix( const char *str )
 
             // Увеличивам указатель на 1
             ++str;
+            prev_token = current_token;
         }
     } // end of while
 
@@ -146,7 +154,11 @@ double Calculator::calculate( vector<string> &postfix_list )
         } else {
 
             auto oper = m_token_map[token.front()];
-            if( oper.valueString().front() != '^' ) {
+            if( '~' == oper.valueString().front() ) {
+                double num = -number_stack.top();
+                number_stack.pop();
+                number_stack.push(num);
+            } else if( '^' != oper.valueString().front() ) {
                 double right = number_stack.top();
                 number_stack.pop();
                 double left = number_stack.top();
@@ -185,14 +197,14 @@ double Calculator::calculate( vector<string> &postfix_list )
                     token = postfix_list.at(i-1);
 
                     if( MyMath::isDigitDot( token.front() ) ) {
-                        number_stack.push( MyMath::my_atod (token.data() ) );
+                        number_stack.push( MyMath::my_atod ( token.data() ) );
                     }
                      else {
                         throw std::runtime_error("Bad token, number expected...");
                     }
                 }
 
-                for( unsigned int pwc = 0; pwc < power_count; ++pwc ) {
+                for( unsigned int j = 0; j < power_count; ++j ) {
                     auto right = number_stack.top();
                     number_stack.pop();
                     auto left = number_stack.top();
@@ -207,3 +219,4 @@ double Calculator::calculate( vector<string> &postfix_list )
 
     return number_stack.top();
 }
+

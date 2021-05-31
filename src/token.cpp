@@ -20,7 +20,8 @@ Token::Token( char val, int pr, TypeToken type ) : Token ( "", pr, type )
 
 Token::Token(double val, Token::TypeToken type) :
     mValueDouble( val ),
-    mType( type )
+    mType( type ),
+    mValid(true)
 {
     //
 }
