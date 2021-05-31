@@ -16,15 +16,17 @@ int main()
 //    char str[] = "2.5 * (-22 + 2 ^ 2 ^ 3) * (3 - 1)";
 //    char str[] = "3 * ((-25 - 10 * -2 ^ 2 / 4) * (4 + 5)) / 2";
 //    char str[] = "(10 - 15) * 3";
-//    char str[] = "2 ^ 2 ^ 3";
-    char str[] ="3 + 4 * 2 / ( 1 - 5 ) ^ 2 ^ 3";
+    char str[] = "2 ^ 2 ^ 3";
+//    char str[] ="3 + 4 * 2 / ( 1 - 5 ) ^ 2 ^ 3";
+//    char str[] = "2 * (2 + ~2 ^ 2 ^ 3) - 1";
 
 
 //    char s[] = ".";
 //    cout << MyMath::my_atod(s) << endl;
 
     Calculator calc;
-    calc.calc( str );
+    double result = calc.calc( str );
+    cout << result << endl;
 
 
 //    const char test[][100] =

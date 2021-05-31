@@ -1,10 +1,9 @@
 #include <cstring>
 #include <iostream>
-#include <list>
 #include <stack>
-#include <string>
 #include <stdexcept>
 #include <unordered_map>
+#include <cmath>
 
 #include "calculator.h"
 #include "mymath.h"
@@ -14,34 +13,33 @@ using namespace std;
 
 Calculator::Calculator()
 {
-    mTokenMap['('] = Token( "(", 0, Token::OPEN_BRACKET );
-    mTokenMap[')'] = Token( ")", 0, Token::CLOSE_BRACKET );
+    m_token_map['('] = Token( "(", 0, Token::OPEN_BRACKET );
+    m_token_map[')'] = Token( ")", 0, Token::CLOSE_BRACKET );
 
-    mTokenMap['+'] = Token( "+", 2 );
-    mTokenMap['-'] = Token( "-", 2 );
+    m_token_map['+'] = Token( "+", 2 );
+    m_token_map['-'] = Token( "-", 2 );
 
-    mTokenMap['*'] = Token( '*', 3 );
-    mTokenMap['/'] = Token( '/', 3 );
+    m_token_map['*'] = Token( '*', 3 );
+    m_token_map['/'] = Token( '/', 3 );
 
-    mTokenMap['^'] = Token( '^', 4 );
-    mTokenMap['~'] = Token( '~', 5 );
+    m_token_map['^'] = Token( '^', 4 );
+    m_token_map['~'] = Token( '~', 5 );
 }
 
 double Calculator::calc( const char *str )
 {
-    double result = 0.0;
 
-//    auto postfix = sortFromInfix(str);
-//    for ( const auto &s : postfix ) {
-//        cout << s << endl;
-//    }
-
-    return result;
+    auto postfix = sortFromInfix(str);
+    for ( const auto &s : postfix ) {
+        cout << s << endl;
+    }
+//    return calculate(postfix);
+    return double();
 }
 
-list<string> Calculator::sortFromInfix( const char *str )
+vector<string> Calculator::sortFromInfix( const char *str )
 {
-    list<string> postfix;
+    vector<string> postfix;
     stack< Token >  oper_stack;
 
     while( *str != '\0' ) {
@@ -69,30 +67,30 @@ list<string> Calculator::sortFromInfix( const char *str )
             postfix.push_back( num );
         }
         else {
-            auto currentToken = mTokenMap[*str];
-            if( currentToken.isValid() )
+            auto current_token = m_token_map[*str];
+            if( current_token.isValid() )
             {
-                if( currentToken.type() == Token::OPERATOR ) {
+                if( current_token.type() == Token::OPERATOR ) {
                     if( oper_stack.empty() )
-                        oper_stack.push( currentToken );
+                        oper_stack.push( current_token );
                     else {
                         // Если оператор из стека круче чем текущий или равен, то вынимаем в список из стека пока на вершине стека не будет меньше
-                        if( oper_stack.top().priority() >= currentToken.priority() ) {
-                            while( !oper_stack.empty() && oper_stack.top().priority() >= currentToken.priority() ) {
+                        if( oper_stack.top().priority() >= current_token.priority() ) {
+                            while( !oper_stack.empty() && oper_stack.top().priority() >= current_token.priority() ) {
                                 postfix.push_back( oper_stack.top().valueString() );
                                 oper_stack.pop();
                             }
                         }
                         // Если нет, то кладем в стек или все вынули
-                        oper_stack.push( currentToken );
+                        oper_stack.push( current_token );
                     }
                 }
                 // Если открываюшая скобка то кладет в стек
-                else if( currentToken.type() == Token::OPEN_BRACKET ) {
-                    oper_stack.push( currentToken );
+                else if( current_token.type() == Token::OPEN_BRACKET ) {
+                    oper_stack.push( current_token );
                 }
                 // Если закрывающая то вынимаем все из стека в список пока не найдет открывающуюся
-                else if( currentToken.type() == Token::CLOSE_BRACKET ) {
+                else if( current_token.type() == Token::CLOSE_BRACKET ) {
                     while( !oper_stack.empty() && oper_stack.top().type() != Token::OPEN_BRACKET ) {
                         postfix.push_back( oper_stack.top().valueString() );
                         oper_stack.pop();
@@ -104,13 +102,13 @@ list<string> Calculator::sortFromInfix( const char *str )
                         throw std::runtime_error("Open bracket: '(' not found...");
                     }
                 } else {
-                    throw std::runtime_error("Unknown token: '" + currentToken.valueString() + "' ..." );
+                    throw std::runtime_error("Unknown token: '" + current_token.valueString() + "' ..." );
                 }
             }
             else {
                 string s;
                 s.push_back(*str);
-                throw std::runtime_error("Invalid token: '" + currentToken.valueString() + "' current char: '" + s + "' ...");
+                throw std::runtime_error("Invalid token: '" + current_token.valueString() + "' current char: '" + s + "' ...");
             }
 
             // Увеличивам указатель на 1
@@ -128,6 +126,63 @@ list<string> Calculator::sortFromInfix( const char *str )
         oper_stack.pop();
     }
 
-return postfix;
+    return postfix;
 }
 
+
+double Calculator::calculate( vector<string> &postfix_list )
+{
+    stack< double > number_stack;
+    int power_count = 0;
+    int iteration = 0;
+
+    for( auto &token : postfix_list )
+    {
+        if( token.empty() )
+            continue;
+
+        if( MyMath::isDigitDot( token.front() ) ) {
+            number_stack.push( MyMath::my_atod (token.data() ) );
+        } else {
+            auto oper = m_token_map[token.front()];
+            double right = number_stack.top();
+            number_stack.pop();
+            double left = number_stack.top();
+            number_stack.pop();
+            switch ( oper.valueString().front() ) {
+                case '+':
+                    number_stack.push( left + right );
+                break;
+
+                case '-':
+                    number_stack.push( left - right );
+                break;
+
+                case '*':
+                    number_stack.push( left * right );
+                break;
+
+                case '/':
+                    if( right != 0 )
+                        number_stack.push( left / right );
+                    else
+                        throw std::runtime_error("Division by zero...");
+                break;
+
+                case '^':
+                    power_count = 1;
+                    int pow_position = iteration + 2;
+                    while( pow_position < postfix_list.size() && "^" == postfix_list[pow_position] ) {
+                        ++power_count;
+                        pow_position = iteration + 2;
+                    }
+                    number_stack.push( pow( left, right ) );
+                break;
+            }
+        }
+
+        ++iteration;
+    }
+
+    return number_stack.top();
+}
