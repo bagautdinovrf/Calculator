@@ -15,7 +15,7 @@ using namespace std;
 Calculator::Calculator()
 {
     mTokenMap['('] = Token( "(", 0, Token::OPEN_BRACKET );
-    mTokenMap[')'] = Token( ")", 1, Token::CLOSE_BRACKET );
+    mTokenMap[')'] = Token( ")", 0, Token::CLOSE_BRACKET );
 
     mTokenMap['+'] = Token( "+", 2 );
     mTokenMap['-'] = Token( "-", 2 );
