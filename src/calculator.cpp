@@ -183,8 +183,6 @@ double Calculator::calculate( vector<string> &postfix_list )
                         else
                             throw std::runtime_error("Division by zero...");
                     break;
-
-
                 }
             } else {
                 // Вычисление возведения в степень
