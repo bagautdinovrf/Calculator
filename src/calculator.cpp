@@ -28,9 +28,9 @@ double Calculator::calc( const char *str )
 {
 
     auto postfix = sortFromInfix(str);
-//    for ( const auto &s : postfix ) {
-//        cout << s << endl;
-//    }
+    for ( const auto &s : postfix ) {
+        cout << s << endl;
+    }
     return calculate(postfix);
 }
 
@@ -152,12 +152,27 @@ double Calculator::calculate( vector<string> &postfix_list )
         if( MyMath::isDigitDot( token.front() ) ) {
             number_stack.push( MyMath::my_atod (token.data() ) );
         } else {
-
             auto oper = m_token_map[token.front()];
-            if( '~' == oper.valueString().front() ) {
+            if( '~' == oper.valueString().front() )
+            {
+                // Подсчет унарных минусов в начале строки // из-за особенностей сортировки минусы будут добавлятся вначало
+                static unsigned int unar_minus = 0;
+                if( number_stack.empty() ) {
+                    ++unar_minus;
+                    continue;
+                }
+
+                // Если количество унарных операций вначале строки нечетное, то число остется положительным
+                // поэтому просто выходим
+                if( unar_minus && 0 != unar_minus % 2 ) {
+                    continue;
+                }
+
                 double num = -number_stack.top();
                 number_stack.pop();
                 number_stack.push(num);
+                unar_minus = 0;
+
             } else if( '^' != oper.valueString().front() ) {
                 double right = number_stack.top();
                 number_stack.pop();
