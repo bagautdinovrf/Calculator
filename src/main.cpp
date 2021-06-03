@@ -20,7 +20,7 @@ int main()
 //    char str[] ="3 + 40 * 2 / ( 1 - 5 ) ^ 2 ^ 3";
 //    char str[] = "2 * (2 + ~2 ^ 2 ^ 3) - 1";
 //    char str[]  = "15*15/5*5";
-    char str[]  = "9*-8";
+    char str[]  = "^2";
 
     Calculator calc;
     double result = calc.calc( str );

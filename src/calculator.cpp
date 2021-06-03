@@ -174,7 +174,7 @@ double Calculator::calculate( vector<string> &postfix_list )
                 number_stack.push(num);
                 unar_minus = 0;
 
-            } else if( '^' != oper.valueString().front() ) {
+            } else if( '^' != oper.valueString().front() && 2 >= number_stack.size() ) {
                 double right = number_stack.top();
                 number_stack.pop();
                 double left = number_stack.top();
@@ -200,7 +200,7 @@ double Calculator::calculate( vector<string> &postfix_list )
                             throw std::runtime_error("Division by zero...");
                     break;
                 }
-            } else {
+            } else if ( 2 <= number_stack.size() ) {
                 // Вычисление возведения в степень
                 unsigned int power_count = 1;
                 unsigned int pow_position = i + 2;
@@ -228,6 +228,9 @@ double Calculator::calculate( vector<string> &postfix_list )
                 }
 
             } // token '^' cycle
+            else {
+                throw std::runtime_error("Stack size error...");
+            }
         }
 
     }
