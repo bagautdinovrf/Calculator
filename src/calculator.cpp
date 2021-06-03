@@ -165,6 +165,7 @@ double Calculator::calculate( vector<string> &postfix_list )
                 // Если количество унарных операций вначале строки нечетное, то число остется положительным
                 // поэтому просто выходим
                 if( unar_minus && 0 != unar_minus % 2 ) {
+                    unar_minus = 0;
                     continue;
                 }
 
