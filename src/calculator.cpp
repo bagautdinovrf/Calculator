@@ -28,9 +28,9 @@ double Calculator::calc( const char *str )
 {
 
     auto postfix = sortFromInfix(str);
-    for ( const auto &s : postfix ) {
-        cout << s << endl;
-    }
+//    for ( const auto &s : postfix ) {
+//        cout << s << endl;
+//    }
     return calculate(postfix);
 }
 
