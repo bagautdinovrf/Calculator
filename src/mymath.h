@@ -10,7 +10,7 @@ public:
     MyMath();
 
     static int my_atoi( char str[] );
-    static double my_atod( char * str );
+    static double my_atod(const char* str);
     static void str_size( const char * str );
     static bool isDigit( const char ch );
     static bool isDot(const char ch);

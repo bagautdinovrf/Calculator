@@ -4,3 +4,5 @@ doc/~$Задача.docx
 *.user
 src/CMakeLists.txt.user*
 src/src.zip
+build/
+build-*/

@@ -1,240 +1,170 @@
-#include <cstring>
-#include <iostream>
+#include <cmath>
 #include <stack>
 #include <stdexcept>
-#include <unordered_map>
-#include <cmath>
 
 #include "calculator.h"
 #include "mymath.h"
 
-
-using namespace std;
+namespace {
+bool isWhitespace(char ch)
+{
+    return ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' ||
+           ch == '\f' || ch == '\v';
+}
+}
 
 Calculator::Calculator()
 {
-    m_token_map['('] = Token( "(", 0, Token::OPEN_BRACKET );
-    m_token_map[')'] = Token( ")", 0, Token::CLOSE_BRACKET );
-
-    m_token_map['+'] = Token( "+", 2 );
-    m_token_map['-'] = Token( "-", 2 );
-    m_token_map['*'] = Token( '*', 3 );
-    m_token_map['/'] = Token( '/', 3 );
-    m_token_map['^'] = Token( '^', 4 );
-    m_token_map['~'] = Token( '~', 5 );
+    m_token_map['('] = Token("(", 0, Token::OPEN_BRACKET);
+    m_token_map[')'] = Token(")", 0, Token::CLOSE_BRACKET);
+    m_token_map['+'] = Token('+', 2);
+    m_token_map['-'] = Token('-', 2);
+    m_token_map['*'] = Token('*', 3);
+    m_token_map['/'] = Token('/', 3);
+    m_token_map['^'] = Token('^', 4);
+    m_token_map['~'] = Token('~', 5);
 }
 
-double Calculator::calc( const char *str )
+double Calculator::calc(const char* str)
 {
-
-    auto postfix = sortFromInfix(str);
-//    for ( const auto &s : postfix ) {
-//        cout << s << endl;
-//    }
+    const auto postfix = sortFromInfix(str);
     return calculate(postfix);
 }
 
-vector<string> Calculator::sortFromInfix( const char *str )
+std::vector<std::string> Calculator::sortFromInfix(const char* str) const
 {
-    vector<string> postfix;
-    stack< Token >  oper_stack;
-    Token prev_token = Token();
+    if (str == nullptr)
+        throw std::runtime_error("Null expression...");
 
-    while( *str != '\0' ) {
+    std::vector<std::string> postfix;
+    std::stack<Token> operators;
+    bool expect_operand = true;
 
-        while ( *str == ' ' ) {
+    while (*str != '\0') {
+        if (isWhitespace(*str)) {
             ++str;
+            continue;
         }
 
-        if( MyMath::isDigitDot(*str) ) {
-            string num;
-            while ( MyMath::isDigitDot( *str ) ) {
+        if (MyMath::isDigitDot(*str)) {
+            if (!expect_operand)
+                throw std::runtime_error("Operator expected between operands...");
 
-                int dot_count = 0;
-                if( MyMath::isDot( *str ) ) {
-                    ++dot_count;
-                    if( dot_count > 1) {
-                        throw std::runtime_error( "Floating point error..." );
-                    }
-                }
-
-                num.push_back( *str );
-                ++str;
-            }
-
-            postfix.push_back( num );
-            prev_token = Token( MyMath::my_atod( num.data() ) );
-        }
-        else {
-            auto current_token = m_token_map[*str];
-            if( current_token.isValid() )
-            {
-                if( current_token.type() == Token::OPERATOR ) {
-                    // Подставляем унарный минус. Если перед минусом пусто, не число и не скобка ')'
-                    if( ( *str == '-' && false == prev_token.isValid() ) ||
-                        ( *str == '-' && Token::NUMBER != prev_token.type() && Token::CLOSE_BRACKET != prev_token.type() )
-                    )
-                    {
-                        current_token = m_token_map['~'];
-                    }
-
-                    if( oper_stack.empty() )
-                        oper_stack.push( current_token );
-                    else {
-                        // Если оператор из стека круче чем текущий или равен, то вынимаем в список из стека пока на вершине стека не будет меньше
-                        if( oper_stack.top().priority() >= current_token.priority() ) {
-                            while( !oper_stack.empty() && oper_stack.top().priority() >= current_token.priority() ) {
-                                postfix.push_back( oper_stack.top().valueString() );
-                                oper_stack.pop();
-                            }
-                        }
-                        // Если нет, то кладем в стек или все вынули
-                        oper_stack.push( current_token );
-                    }
-                }
-                // Если открываюшая скобка то кладет в стек
-                else if( current_token.type() == Token::OPEN_BRACKET ) {
-                    oper_stack.push( current_token );
-                }
-                // Если закрывающая то вынимаем все из стека в список пока не найдет открывающуюся
-                else if( current_token.type() == Token::CLOSE_BRACKET ) {
-                    while( !oper_stack.empty() && oper_stack.top().type() != Token::OPEN_BRACKET ) {
-                        postfix.push_back( oper_stack.top().valueString() );
-                        oper_stack.pop();
-                    }
-                    // Вынимаем открывающую скобку
-                    if( !oper_stack.empty() && oper_stack.top().type() == Token::OPEN_BRACKET ) {
-                        oper_stack.pop();
-                    } else {
-                        throw std::runtime_error("Open bracket: '(' not found...");
-                    }
+            std::string number;
+            bool has_dot = false;
+            bool has_digit = false;
+            while (MyMath::isDigitDot(*str)) {
+                if (MyMath::isDot(*str)) {
+                    if (has_dot)
+                        throw std::runtime_error("Multiple decimal points in number...");
+                    has_dot = true;
                 } else {
-                    throw std::runtime_error("Unknown token: '" + current_token.valueString() + "' ..." );
+                    has_digit = true;
                 }
+                number.push_back(*str++);
             }
-            else {
-                string s;
-                s.push_back(*str);
-                throw std::runtime_error("Invalid token: '" + current_token.valueString() + "' current char: '" + s + "' ...");
+            if (!has_digit)
+                throw std::runtime_error("Number must contain a digit...");
+
+            postfix.push_back(number);
+            expect_operand = false;
+            continue;
+        }
+
+        const auto found = m_token_map.find(*str);
+        if (found == m_token_map.end())
+            throw std::runtime_error("Invalid token: '" + std::string(1, *str) + "'...");
+        const Token current = found->second;
+
+        if (current.type() == Token::OPEN_BRACKET) {
+            if (!expect_operand)
+                throw std::runtime_error("Operator expected before '('...");
+            operators.push(current);
+        } else if (current.type() == Token::CLOSE_BRACKET) {
+            if (expect_operand)
+                throw std::runtime_error("Operand expected before ')'...");
+            while (!operators.empty() && operators.top().type() != Token::OPEN_BRACKET) {
+                postfix.push_back(operators.top().valueString());
+                operators.pop();
             }
-
-            // Увеличивам указатель на 1
-            ++str;
-            prev_token = current_token;
+            if (operators.empty())
+                throw std::runtime_error("Open bracket: '(' not found...");
+            operators.pop();
+            expect_operand = false;
+        } else if (expect_operand) {
+            if (*str != '-' && *str != '~')
+                throw std::runtime_error("Operand expected...");
+            // Prefix operators wait for their operand, including other prefix operators.
+            operators.push(m_token_map.at('~'));
+        } else {
+            if (*str == '~')
+                throw std::runtime_error("Operator expected before unary minus...");
+            const bool right_associative = *str == '^';
+            while (!operators.empty() && operators.top().type() == Token::OPERATOR &&
+                   (operators.top().priority() > current.priority() ||
+                    (!right_associative && operators.top().priority() == current.priority()))) {
+                postfix.push_back(operators.top().valueString());
+                operators.pop();
+            }
+            operators.push(current);
+            expect_operand = true;
         }
-    } // end of while
-
-
-    while( !oper_stack.empty() ) {
-        auto top = oper_stack.top();
-        if( top.type() == Token::OPEN_BRACKET ) {
-            throw std::runtime_error("Absent token: ')'. But found token: '(' in stack...");
-        }
-        postfix.push_back( top.valueString() );
-        oper_stack.pop();
+        ++str;
     }
 
+    if (expect_operand)
+        throw std::runtime_error("Empty or incomplete expression...");
+
+    while (!operators.empty()) {
+        if (operators.top().type() == Token::OPEN_BRACKET)
+            throw std::runtime_error("Closing bracket: ')' not found...");
+        postfix.push_back(operators.top().valueString());
+        operators.pop();
+    }
     return postfix;
 }
 
-
-double Calculator::calculate( vector<string> &postfix_list )
+double Calculator::calculate(const std::vector<std::string>& postfix_list) const
 {
-    stack< double > number_stack;
-
-    for( unsigned int i = 0; i < postfix_list.size(); ++i )
-    {
-        auto &token = postfix_list.at(i);
-
-        if( token.empty() )
+    std::stack<double> numbers;
+    for (const auto& token : postfix_list) {
+        if (MyMath::isDigitDot(token.front())) {
+            numbers.push(MyMath::my_atod(token.c_str()));
             continue;
-
-        if( MyMath::isDigitDot( token.front() ) ) {
-            number_stack.push( MyMath::my_atod (token.data() ) );
-        } else {
-            auto oper = m_token_map[token.front()];
-            if( '~' == oper.valueString().front() )
-            {
-                // Подсчет унарных минусов в начале строки // из-за особенностей сортировки минусы будут добавлятся вначало
-                static unsigned int unar_minus = 0;
-                if( number_stack.empty() ) {
-                    ++unar_minus;
-                    continue;
-                }
-
-                // Если количество унарных операций вначале строки нечетное, то число остется положительным
-                // поэтому просто выходим
-                if( unar_minus && 0 != unar_minus % 2 ) {
-                    unar_minus = 0;
-                    continue;
-                }
-
-                double num = -number_stack.top();
-                number_stack.pop();
-                number_stack.push(num);
-                unar_minus = 0;
-
-            } else if( '^' != oper.valueString().front() && 2 >= number_stack.size() ) {
-                double right = number_stack.top();
-                number_stack.pop();
-                double left = number_stack.top();
-                number_stack.pop();
-
-                switch ( oper.valueString().front() ) {
-                    case '+':
-                        number_stack.push( left + right );
-                    break;
-
-                    case '-':
-                        number_stack.push( left - right );
-                    break;
-
-                    case '*':
-                        number_stack.push( left * right );
-                    break;
-
-                    case '/':
-                        if( right != 0 )
-                            number_stack.push( left / right );
-                        else
-                            throw std::runtime_error("Division by zero...");
-                    break;
-                }
-            } else if ( 2 <= number_stack.size() ) {
-                // Вычисление возведения в степень
-                unsigned int power_count = 1;
-                unsigned int pow_position = i + 2;
-                while( pow_position < postfix_list.size() && "^" == postfix_list.at( pow_position ) ) {
-                    ++power_count;
-                    i = pow_position;
-                    pow_position += 2;
-
-                    token = postfix_list.at(i-1);
-
-                    if( MyMath::isDigitDot( token.front() ) ) {
-                        number_stack.push( MyMath::my_atod ( token.data() ) );
-                    }
-                     else {
-                        throw std::runtime_error("Bad token, number expected...");
-                    }
-                }
-
-                for( unsigned int j = 0; j < power_count; ++j ) {
-                    auto right = number_stack.top();
-                    number_stack.pop();
-                    auto left = number_stack.top();
-                    number_stack.pop();
-                    number_stack.push( pow( left, right ) );
-                }
-
-            } // token '^' cycle
-            else {
-                throw std::runtime_error("Stack size error...");
-            }
         }
 
+        const char op = token.front();
+        if (op == '~') {
+            if (numbers.empty())
+                throw std::runtime_error("Unary operator requires an operand...");
+            numbers.top() = -numbers.top();
+            continue;
+        }
+        if (numbers.size() < 2)
+            throw std::runtime_error("Binary operator requires two operands...");
+
+        const double right = numbers.top();
+        numbers.pop();
+        const double left = numbers.top();
+        numbers.pop();
+        double result = 0;
+        switch (op) {
+        case '+': result = left + right; break;
+        case '-': result = left - right; break;
+        case '*': result = left * right; break;
+        case '/':
+            if (right == 0)
+                throw std::runtime_error("Division by zero...");
+            result = left / right;
+            break;
+        case '^': result = std::pow(left, right); break;
+        default: throw std::runtime_error("Unknown operator...");
+        }
+        if (!std::isfinite(result))
+            throw std::runtime_error("Non-finite arithmetic result...");
+        numbers.push(result);
     }
-
-    return number_stack.top();
+    if (numbers.size() != 1)
+        throw std::runtime_error("Expression must produce exactly one result...");
+    return numbers.top();
 }
-

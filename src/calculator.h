@@ -1,15 +1,11 @@
 #ifndef CALCULATOR_H
 #define CALCULATOR_H
 
-#include <list>
 #include <vector>
 #include <string>
 #include <unordered_map>
-#include <memory>
 
 #include "token.h"
-
-using namespace std;
 
 class Calculator
 {
@@ -18,10 +14,10 @@ public:
     double calc(const char* str);
 
 private:
-     vector<string> sortFromInfix(const char* str );
-     double calculate( vector<string> &postfix_list );
+    std::vector<std::string> sortFromInfix(const char* str) const;
+    double calculate(const std::vector<std::string>& postfix_list) const;
 
-    unordered_map< char, Token > m_token_map;
+    std::unordered_map<char, Token> m_token_map;
 };
 
 
